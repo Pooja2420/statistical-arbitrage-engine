@@ -24,3 +24,6 @@ data/processed/*
 # IDE
 .vscode/
 .idea/
+
+.DS_Store
+~$*.docx
