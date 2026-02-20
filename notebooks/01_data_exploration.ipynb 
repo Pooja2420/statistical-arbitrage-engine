@@ -1,0 +1,82 @@
+# %% [markdown]
+# # Week 1: Data Exploration
+# **Objective:** Load and explore S&P 500 stock data
+
+# %%
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+import sys
+import os
+
+# Add src to path
+sys.path.append(os.path.join(os.path.dirname(os.getcwd()), 'src'))
+
+from data.data_loader import DataLoader
+
+print("✅ Libraries imported!")
+
+# %%
+# Load sample data
+data = pd.read_parquet('../data/raw/sp500_sample.parquet')
+pairs = pd.read_parquet('../data/raw/cointegrated_pairs.parquet')
+
+print(f"📊 S&P 500 Sample: {data.shape[0]} days × {data.shape[1]} stocks")
+print(f"📈 Pairs: {pairs.shape[0]} days × {pairs.shape[1]} stocks")
+print(f"📅 Date range: {data.index[0].date()} to {data.index[-1].date()}")
+
+# %%
+# Display first rows
+data.head()
+
+# %%
+# Basic statistics
+data.describe()
+
+# %%
+# Calculate returns
+loader = DataLoader()
+returns = loader.calculate_returns(data)
+
+print(f"Mean daily return: {returns.mean().mean():.4%}")
+print(f"Mean volatility: {returns.std().mean():.4%}")
+
+returns.head()
+
+# %%
+# Plot sample stocks
+
+
+fig, axes = plt.subplots(2, 2, figsize=(15, 8))
+stocks = data.columns[:4]
+
+for idx, stock in enumerate(stocks):
+    ax = axes[idx//2, idx%2]
+    data[stock].plot(ax=ax, title=stock)
+    ax.grid(True, alpha=0.3)
+
+plt.tight_layout()
+plt.savefig('../results/plots/sample_stocks.png', dpi=150)
+plt.show()
+
+# %%
+# Correlation matrix
+corr = returns.corr()
+
+plt.figure(figsize=(12, 10))
+sns.heatmap(corr, cmap='RdYlBu', center=0, square=True)
+plt.title('Stock Correlations')
+plt.tight_layout()
+plt.savefig('../results/plots/correlation.png', dpi=150)
+plt.show()
+
+# %%
+# Summary
+print("\n" + "="*60)
+print("✅ DATA EXPLORATION COMPLETE")
+print("="*60)
+print(f"Stocks analyzed: {data.shape[1]}")
+print(f"Trading days: {data.shape[0]}")
+print("Next: Build cointegration tests")
+print("="*60)
